@@ -1,6 +1,10 @@
 package basic.control;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
@@ -60,6 +64,46 @@ public class root1Controller implements Initializable {
 				} else if (comboPublic.getValue() == null || comboPublic.getValue().equals("")) {
 					showPopup("공개여부를 지정하세요");
 				}
+				else if (dateExit.getValue() == null || dateExit.getValue().equals("")) {
+					showPopup("날짜를 지정하세요");
+					}else insetDate();
+			}
+					
+
+			
+			public void insetDate() {
+				String url = "jdbc:oracle:thin:@localhost:1521:xe";
+				String user = "hr", passwd = "hr";
+			
+				Connection conn = null;
+				try {
+					Class.forName("oracle.jdbc.driver.OracleDriver");
+					conn = DriverManager.getConnection(url, user, passwd);
+				} catch (Exception e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+				String sql = "insert into new_board values(?,?,?,?,?)";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, txtTitle.getText());
+					pstmt.setString(2, txtPassword.getText());
+					pstmt.setString(3, comboPublic.getValue());
+					pstmt.setString(4, dateExit.getValue().toString());
+					pstmt.setString(5, txtContent.getText());
+
+					int r = pstmt.executeUpdate();
+					System.out.println(r + " 건 입력됨");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}finally {
+					try {
+						conn.close();
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		});
 
@@ -97,35 +141,37 @@ public class root1Controller implements Initializable {
 		pop.setAutoHide(true);
 		pop.show(btnReg.getScene().getWindow());
 	}
+
 	public void showCustomDialog(String msg) {
-		Stage stage=new Stage(StageStyle.UTILITY);
+		Stage stage = new Stage(StageStyle.UTILITY);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(btnReg.getScene().getWindow());
-		
-		AnchorPane ap=new AnchorPane();
+
+		AnchorPane ap = new AnchorPane();
 		ap.setPrefSize(400, 150);
-		
-		ImageView iv=new ImageView();
+
+		ImageView iv = new ImageView();
 		iv.setImage(new Image("basic/images/dialog-info.png"));
 		iv.setFitWidth(50);
 		iv.setFitHeight(50);
 		iv.setLayoutX(15);
 		iv.setLayoutY(15);
 		iv.setPreserveRatio(true);
-		
-		Button btnOk=new Button("확인");
+
+		Button btnOk = new Button("확인");
 		btnOk.setLayoutX(336);
 		btnOk.setLayoutY(104);
-		btnOk.setOnAction((e)->stage.close());
-		
-		Label label=new Label(msg);
+		btnOk.setOnAction((e) -> stage.close());
+
+		Label label = new Label(msg);
 		label.setLayoutX(87);
 		label.setLayoutY(33);
 		label.setPrefSize(290, 15);
-		
+
 		Scene scene = new Scene(ap);
 		stage.setScene(scene);
 		stage.show();
+
 	}
 	/*
 	 * public void handleBtnCancelAction(ActionEvent e) { Platform.exit(); }
